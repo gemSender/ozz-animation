@@ -41,6 +41,7 @@ class Skeleton;
 
 namespace offline {
 
+	class AnimationOptimizer;
 // Defines ozz converter/importer interface.
 // OzzImporter implements a command line tool to convert any source data format
 // to ozz skeletons and animations. The tool exposes a set of global options
@@ -122,6 +123,7 @@ class OzzImporter {
   virtual bool Import(const char* _animation_name, const char* _node_name,
                       const char* _track_name, float _sampling_rate,
                       RawFloat4Track* _track) = 0;
+  virtual void OnRawAnimationGenerated(ozz::animation::offline::AnimationOptimizer& optimizer, const ozz::animation::Skeleton& skeleton, ozz::animation::offline::RawAnimation& animation);
 };
 }  // namespace offline
 }  // namespace animation

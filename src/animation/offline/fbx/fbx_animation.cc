@@ -99,7 +99,7 @@ SamplingInfo ExtractSamplingInfo(FbxScene* _scene, FbxAnimStack* _anim_stack,
 }
 
 bool ExtractAnimation(FbxSceneLoader& _scene_loader, const SamplingInfo& _info,
-                      const Skeleton& _skeleton, RawAnimation* _animation) {
+                      const Skeleton& _skeleton, RawAnimation* _animation, bool xAxisFlip) {
   FbxScene* scene = _scene_loader.scene();
   assert(scene);
 
@@ -116,6 +116,8 @@ bool ExtractAnimation(FbxSceneLoader& _scene_loader, const SamplingInfo& _info,
   // Preallocates and initializes world matrices.
   const size_t max_keys =
       static_cast<size_t>(3.f + (_info.end - _info.start) / _info.period);
+
+  ozz::log::Log() << "max keys of " << _animation->name << ": " << max_keys << std::endl;
   ozz::Vector<float>::Std times;
   times.reserve(max_keys);
   ozz::Vector<ozz::Vector<ozz::math::Float4x4>::Std>::Std world_matrices;
@@ -144,8 +146,17 @@ bool ExtractAnimation(FbxSceneLoader& _scene_loader, const SamplingInfo& _info,
       if (node) {
         const FbxAMatrix fbx_matrix =
             evaluator->GetNodeGlobalTransform(node, FbxTimeSeconds(t));
-        const math::Float4x4 matrix =
+        math::Float4x4 matrix =
             _scene_loader.converter()->ConvertMatrix(fbx_matrix);
+		//Modify: xflip for unity
+		//if (xAxisFlip)
+		//{
+		//	ozz::math::SimdFloat4 x;
+		//	float *px = (float*)&x;
+		//	ozz::math::StorePtr(matrix.cols[3], px);
+		//	*px = -*px;
+		//	matrix.cols[3] = ozz::math::simd_float4::LoadPtr(px);
+		//}
         world_matrices[i].push_back(matrix);
       }
     }
@@ -242,6 +253,12 @@ bool ExtractAnimation(FbxSceneLoader& _scene_loader, const SamplingInfo& _info,
       math::Store3PtrU(s, &transform.scale.x);
 
       // Fills corresponding track.
+	  if (xAxisFlip)
+	  {
+		  transform.translation.x = -transform.translation.x;
+		  transform.rotation.y = -transform.rotation.y;
+		  transform.rotation.z = -transform.rotation.z;
+	  }
       const float time = times[n];
       const RawAnimation::TranslationKey tkey = {time, transform.translation};
       track.translations.push_back(tkey);
@@ -597,7 +614,7 @@ OzzImporter::AnimationNames GetAnimationNames(FbxSceneLoader& _scene_loader) {
 bool ExtractAnimation(const char* _animation_name,
                       FbxSceneLoader& _scene_loader, const Skeleton& _skeleton,
                       float _sampling_rate,
-                      ozz::animation::offline::RawAnimation* _animation) {
+                      ozz::animation::offline::RawAnimation* _animation, bool xAxisFlip) {
   FbxScene* scene = _scene_loader.scene();
   assert(scene);
 
@@ -616,7 +633,7 @@ bool ExtractAnimation(const char* _animation_name,
     // Setup Fbx animation evaluator.
     scene->SetCurrentAnimationStack(anim_stack);
 
-    success = ExtractAnimation(_scene_loader, info, _skeleton, _animation);
+    success = ExtractAnimation(_scene_loader, info, _skeleton, _animation, xAxisFlip);
   }
 
   // Clears output if something failed during import, avoids partial data.

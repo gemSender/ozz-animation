@@ -28,6 +28,8 @@
 #ifndef OZZ_ANIMATION_OFFLINE_FBX_FBX2OZZ_H_
 #define OZZ_ANIMATION_OFFLINE_FBX_FBX2OZZ_H_
 
+#include <string>
+
 #include "ozz/animation/offline/tools/import2ozz.h"
 
 #include "ozz/animation/offline/fbx/fbx.h"
@@ -42,6 +44,23 @@
 //
 // Use fbx2ozz integrated help command (fbx2ozz --help) for more details
 // about available arguments.
+
+struct SplitedAnimDesc
+{
+	std::string name;
+	int startFrame;
+	int endFrame;
+	float startTime{0};
+	float endTime{0};
+};
+
+namespace ozz {
+	namespace animation {
+		namespace offline {
+			class AnimationOptimizer;
+		}
+	}
+}
 
 class Fbx2OzzImporter : public ozz::animation::offline::OzzImporter {
  public:
@@ -82,9 +101,13 @@ class Fbx2OzzImporter : public ozz::animation::offline::OzzImporter {
                       const char* _track_name, float _sampling_rate,
                       ozz::animation::offline::RawFloat4Track* _track);
 
+  virtual void OnRawAnimationGenerated(ozz::animation::offline::AnimationOptimizer& optimizer, const ozz::animation::Skeleton& skeleton, ozz::animation::offline::RawAnimation& animation);
+
   // Fbx internal helpers
   ozz::animation::offline::fbx::FbxManagerInstance fbx_manager_;
   ozz::animation::offline::fbx::FbxAnimationIOSettings settings_;
   ozz::animation::offline::fbx::FbxSceneLoader* scene_loader_;
+  std::vector<SplitedAnimDesc> splitAnimDescs;
+  bool xAxisFlip{ true };
 };
 #endif  // OZZ_ANIMATION_OFFLINE_FBX_FBX2OZZ_H_

@@ -25,6 +25,10 @@
 //                                                                            //
 //----------------------------------------------------------------------------//
 
+#include <fstream>
+#include <regex>
+#include <sstream>
+
 #include "animation/offline/fbx/fbx2ozz.h"
 
 #include "ozz/base/log.h"
@@ -46,7 +50,30 @@ bool Fbx2OzzImporter::Load(const char* _filename) {
   scene_loader_ = ozz::memory::default_allocator()
                       ->New<ozz::animation::offline::fbx::FbxSceneLoader>(
                           _filename, "", fbx_manager_, settings_);
-
+  std::string fileNameStr = _filename;
+  static std::regex r("\\w+\\W+[0-9]+\\W+[0-9]+(\\W+loop)*", std::regex::icase);
+  if (fileNameStr.length() > 5)
+  {
+	  auto txtFileName = fileNameStr.substr(0, fileNameStr.length() - 4) + ".txt";
+	  std::fstream fs(txtFileName);
+	  if (fs) {
+		  std::string line;
+		  while (std::getline(fs, line)) {
+			  std::match_results<std::string::const_iterator> mr;
+			  if (std::regex_match(line, mr, r)) {
+				  std::stringstream ss(line);
+				  std::string clipName;
+				  ss >> clipName;
+				  int startFrame;
+				  ss >> startFrame;
+				  int endFrame;
+				  ss >> endFrame;
+				  ozz::log::Log() << "clipname: " << clipName << " startFrame: " << startFrame << " endFrame: " << endFrame << std::endl;
+				  splitAnimDescs.push_back(SplitedAnimDesc{clipName, startFrame, endFrame});
+			  }
+		  }
+	  }
+  }
   if (!scene_loader_->scene()) {
     ozz::log::Err() << "Failed to import file " << _filename << "."
                     << std::endl;

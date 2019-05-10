@@ -55,7 +55,7 @@ OzzImporter::AnimationNames GetAnimationNames(FbxSceneLoader& _scene_loader);
 
 bool ExtractAnimation(const char* _animation_name,
                       FbxSceneLoader& _scene_loader, const Skeleton& _skeleton,
-                      float _sampling_rate, RawAnimation* _animation);
+                      float _sampling_rate, RawAnimation* _animation, bool xAxisFlip);
 
 OzzImporter::NodeProperties GetNodeProperties(FbxSceneLoader& _scene_loader,
                                               const char* _node_name);

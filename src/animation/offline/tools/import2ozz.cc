@@ -162,6 +162,13 @@ int OzzImporter::operator()(int _argc, const char** _argv) {
 
   return EXIT_SUCCESS;
 }
+
+#pragma warning(push)
+#pragma warning(disable:4100)
+void OzzImporter::OnRawAnimationGenerated(ozz::animation::offline::AnimationOptimizer& optimizer, const ozz::animation::Skeleton& skeleton, ozz::animation::offline::RawAnimation& animation_) {
+
+}
+#pragma warning(pop)
 }  // namespace offline
 }  // namespace animation
 }  // namespace ozz

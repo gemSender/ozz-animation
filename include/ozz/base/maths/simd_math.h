@@ -1019,7 +1019,7 @@ OZZ_INLINE SimdInt4 CmpGe(_SimdInt4 _a, _SimdInt4 _b);
 // matrix-times-vector is written v'=Mv:
 // [ m.cols[0].x m.cols[1].x m.cols[2].x m.cols[3].x ]   {v.x}
 // | m.cols[0].y m.cols[1].y m.cols[2].y m.cols[3].y | * {v.y}
-// | m.cols[0].z m.cols[1].y m.cols[2].y m.cols[3].y |   {v.z}
+// | m.cols[0].z m.cols[1].z m.cols[2].z m.cols[3].z |   {v.z}
 // [ m.cols[0].w m.cols[1].w m.cols[2].w m.cols[3].w ]   {v.1}
 struct Float4x4 {
   // Matrix columns.

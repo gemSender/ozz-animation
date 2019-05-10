@@ -48,7 +48,7 @@ bool Fbx2OzzImporter::Import(ozz::animation::offline::RawSkeleton* _skeleton,
   }
 
   if (!ozz::animation::offline::fbx::ExtractSkeleton(*scene_loader_, _types,
-                                                     _skeleton)) {
+                                                     _skeleton, xAxisFlip)) {
     ozz::log::Err() << "Fbx skeleton extraction failed." << std::endl;
     return false;
   }

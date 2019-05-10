@@ -41,7 +41,7 @@ namespace fbx {
 
 bool ExtractSkeleton(FbxSceneLoader& _loader,
                      const OzzImporter::NodeType& _types,
-                     RawSkeleton* _skeleton);
+                     RawSkeleton* _skeleton, bool xAxisFlip);
 
 }  // namespace fbx
 }  // namespace offline

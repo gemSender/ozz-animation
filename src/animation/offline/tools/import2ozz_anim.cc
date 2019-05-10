@@ -163,7 +163,7 @@ ozz::String::Std BuildFilename(const char* _filename, const char* _data_name) {
 
 bool Export(const ozz::animation::offline::RawAnimation& _raw_animation,
             const ozz::animation::Skeleton& _skeleton,
-            const Json::Value& _config, const ozz::Endianness _endianness) {
+            const Json::Value& _config, const ozz::Endianness _endianness, OzzImporter& _converter) {
   // Raw animation to build and output.
   ozz::animation::offline::RawAnimation raw_animation;
 
@@ -181,7 +181,6 @@ bool Export(const ozz::animation::offline::RawAnimation& _raw_animation,
   } else {
     raw_animation = _raw_animation;
   }
-
   // Optimizes animation if option is enabled.
   if (_config["optimize"].asBool()) {
     ozz::log::Log() << "Optimizing animation." << std::endl;
@@ -195,6 +194,7 @@ bool Export(const ozz::animation::offline::RawAnimation& _raw_animation,
     optimizer.hierarchical_tolerance = tolerances["hierarchical"].asFloat();
 
     ozz::animation::offline::RawAnimation raw_optimized_animation;
+	_converter.OnRawAnimationGenerated(optimizer, _skeleton, raw_animation);
     if (!optimizer(raw_animation, _skeleton, &raw_optimized_animation)) {
       ozz::log::Err() << "Failed to optimize animation." << std::endl;
       return false;
@@ -206,7 +206,6 @@ bool Export(const ozz::animation::offline::RawAnimation& _raw_animation,
     // Brings data back to the raw animation.
     raw_animation = raw_optimized_animation;
   }
-
   // Builds runtime animation.
   ozz::animation::Animation* animation = NULL;
   if (!_config["raw"].asBool()) {
@@ -273,7 +272,7 @@ bool ProcessAnimation(OzzImporter& _converter, const char* _animation_name,
     // Give animation a name
     animation.name = _animation_name;
 
-    return Export(animation, _skeleton, _config, _endianness);
+    return Export(animation, _skeleton, _config, _endianness, _converter);
   }
 }
 

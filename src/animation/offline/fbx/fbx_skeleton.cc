@@ -94,7 +94,7 @@ bool IsTypeSelected(const OzzImporter::NodeType& _types,
 RecurseReturn RecurseNode(FbxNode* _node, FbxSystemConverter* _converter,
                           const OzzImporter::NodeType& _types,
                           RawSkeleton* _skeleton, RawSkeleton::Joint* _parent,
-                          FbxAMatrix _parent_global_inv) {
+                          FbxAMatrix _parent_global_inv, bool xAxisFlip) {
   bool skeleton_found = false;
   RawSkeleton::Joint* this_joint = NULL;
 
@@ -117,7 +117,13 @@ RecurseReturn RecurseNode(FbxNode* _node, FbxSystemConverter* _converter,
     this_joint->name = _node->GetName();
 
     // Extract bind pose.
-    const FbxAMatrix node_global = _node->EvaluateGlobalTransform();
+    FbxAMatrix node_global = _node->EvaluateGlobalTransform();
+	//if (xAxisFlip)
+	//{
+	//	auto fbxTrans = node_global.GetT();
+	//	fbxTrans.Set(-fbxTrans.mData[0], fbxTrans.mData[1], fbxTrans.mData[2]);
+	//	node_global.SetT(fbxTrans);
+	//}
     const FbxAMatrix node_local = _parent_global_inv * node_global;
 
     if (!_converter->ConvertTransform(node_local, &this_joint->transform)) {
@@ -125,7 +131,12 @@ RecurseReturn RecurseNode(FbxNode* _node, FbxSystemConverter* _converter,
                       << this_joint->name << "\"." << std::endl;
       return kError;
     }
-
+	if (xAxisFlip)
+	{
+		this_joint->transform.translation.x = -this_joint->transform.translation.x;
+		this_joint->transform.rotation.y = -this_joint->transform.rotation.y;
+		this_joint->transform.rotation.z = -this_joint->transform.rotation.z;
+	}
     // This node is the new parent for further recursions.
     _parent_global_inv = node_global.Inverse();
     _parent = this_joint;
@@ -135,7 +146,7 @@ RecurseReturn RecurseNode(FbxNode* _node, FbxSystemConverter* _converter,
   for (int i = 0; i < _node->GetChildCount(); i++) {
     FbxNode* child = _node->GetChild(i);
     const RecurseReturn ret = RecurseNode(child, _converter, _types, _skeleton,
-                                          _parent, _parent_global_inv);
+                                          _parent, _parent_global_inv, xAxisFlip);
     if (ret == kError) {
       return ret;
     }
@@ -148,10 +159,10 @@ RecurseReturn RecurseNode(FbxNode* _node, FbxSystemConverter* _converter,
 
 bool ExtractSkeleton(FbxSceneLoader& _loader,
                      const OzzImporter::NodeType& _types,
-                     RawSkeleton* _skeleton) {
+                     RawSkeleton* _skeleton, bool xAxisFlip) {
   RecurseReturn ret =
       RecurseNode(_loader.scene()->GetRootNode(), _loader.converter(), _types,
-                  _skeleton, NULL, FbxAMatrix());
+                  _skeleton, NULL, FbxAMatrix(), xAxisFlip);
   if (ret == kNoSkeleton) {
     ozz::log::Err() << "No skeleton found in Fbx scene." << std::endl;
     return false;
