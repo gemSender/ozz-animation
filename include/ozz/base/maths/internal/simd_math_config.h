@@ -64,7 +64,11 @@
 #define OZZ_SIMD_SSE3
 #define OZZ_SIMD_SSE2  // SSE2 is available if SSE3 is.
 #endif
-
+#if defined(__ARM_NEON)
+#include "SSE2NEON.h"
+#define OZZ_SIMD_SSE3
+#define OZZ_SIMD_SSE2  // SSE2 is available if SSE3 is.
+#endif
 // x64/amd64 have SSE2 instructions
 // _M_IX86_FP is 2 if /arch:SSE2, /arch:AVX or /arch:AVX2 was used.
 #if defined(__SSE2__) || defined(_M_AMD64) || defined(_M_X64) || \
