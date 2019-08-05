@@ -1882,10 +1882,37 @@ FORCE_INLINE void _mm_sfence(void) { __sync_synchronize(); }
 // https://msdn.microsoft.com/en-us/library/ba08y07y%28v=vs.90%29.aspx
 FORCE_INLINE void _mm_stream_si128(__m128i *p, __m128i a) { *p = a; }
 
-FORCE_INLINE __m128i _mm_cmpeq_epi32(__m128i _A, __m128i _B) {
+//TODO: same to _mm_sqrt_ss now
+FORCE_INLINE __m128 _mm_rsqrt_ss(__m128 in) {
+  float32_t value = vgetq_lane_f32(vreinterpretq_f32_m128(_mm_sqrt_ps(in)), 0);
+  return vreinterpretq_m128_f32(
+      vsetq_lane_f32(value, vreinterpretq_f32_m128(in), 0));
+}
+
+FORCE_INLINE __m128i _mm_cmpeq_epi32(__m128i a, __m128i b) {
   return vreinterpretq_m128i_s32(
       vceqq_s32(vreinterpretq_s32_m128i(a), vreinterpretq_s32_m128i(b)));
 }
+
+FORCE_INLINE __m128 _mm_movelh_ps(__m128 a, __m128 b) {
+  return vreinterpretq_m128i_s32(
+      vcombine_f32(vget_low_f32(vreinterpretq_f32_m128(a)),
+                   vget_low_f32(vreinterpretq_f32_m128(b))));
+}
+
+FORCE_INLINE __m128 _mm_movehl_ps(__m128 a, __m128 b) {
+  return vreinterpretq_m128i_s32(
+      vcombine_f32(vget_high_f32(vreinterpretq_f32_m128(a)),
+                   vget_high_f32(vreinterpretq_f32_m128(b))));
+}
+
+FORCE_INLINE __m128 _mm_move_ss(__m128 a, __m128 b) {
+  float32x2_t b01 = vget_low_f32(vreinterpretq_f32_m128(b));
+  return vreinterpretq_m128i_s32(
+      vcombine_f32(vset_lane_f32(vgetq_lane_f32(vreinterpretq_f32_m128(a), 0), b01, 0),
+                   vget_high_f32(vreinterpretq_f32_m128(b)));
+}
+
 
 // Cache line containing p is flushed and invalidated from all caches in the
 // coherency domain. :
