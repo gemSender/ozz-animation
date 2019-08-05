@@ -1914,7 +1914,7 @@ FORCE_INLINE __m128 _mm_move_ss(__m128 a, __m128 b) {
 }
 
 FORCE_INLINE __m128 _mm_set_ss(float a) {
-  return vreinterpretq_m128_f32(vset_lane_f32(a, _mm_setzero_ps(), 0));
+  return vreinterpretq_m128_f32(vsetq_lane_f32(a, _mm_setzero_ps(), 0));
 }
 
 FORCE_INLINE __m128 _mm_load_ps1(float const *mem_addr) {
@@ -1948,6 +1948,16 @@ FORCE_INLINE __m128 _mm_sub_ss(__m128 a, __m128 b) {
   float32x4_t subval =
       _mm_sub_ps(vreinterpretq_f32_m128(a), vreinterpretq_f32_m128(b));
   return _mm_move_ss(a, subval);
+}
+
+FORCE_INLINE void _mm_storel_pi(__m64 *mem_addr, __m128 a) {
+  vst1_f32((float32_t *)p, vget_low_f32((float32x4_t)a));
+}
+
+FORCE_INLINE __m128i _mm_loadl_epi64(__m128i const *p) {
+  /* Load the lower 64 bits of the value pointed to by p into the lower 64 bits
+   * of the result, zeroing the upper 64 bits of the result. */
+  return vcombine_s32(vld1_s32((int32_t const *)p), vcreate_s32(0));
 }
 
 // Cache line containing p is flushed and invalidated from all caches in the
