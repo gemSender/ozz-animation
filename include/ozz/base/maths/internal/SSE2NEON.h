@@ -163,7 +163,7 @@ IN
 
 typedef float32x4_t __m128;
 typedef int32x4_t __m128i;
-
+typedef float32x2_t __m64
 // ******************************************
 // type-safe casting between types
 // ******************************************
@@ -244,19 +244,19 @@ typedef int32x4_t __m128i;
 
 #define vreinterpretq_u64_m128i(x) vreinterpretq_u64_s32(x)
 
-// union intended to allow direct access to an __m128 variable using the names
-// that the MSVC compiler provides.  This union should really only be used when
-// trying to access the members of the vector as integer values.  GCC/clang
-// allow native access to the float members through a simple array access
-// operator (in C since 4.6, in C++ since 4.8).
-//
-// Ideally direct accesses to SIMD vectors should not be used since it can cause
-// a performance hit.  If it really is needed however, the original __m128
-// variable can be aliased with a pointer to this union and used to access
-// individual components.  The use of this union should be hidden behind a macro
-// that is used throughout the codebase to access the members instead of always
-// declaring this type of variable.
-typedef union ALIGN_STRUCT(16) SIMDVec {
+    // union intended to allow direct access to an __m128 variable using the
+    // names that the MSVC compiler provides.  This union should really only be
+    // used when trying to access the members of the vector as integer values.
+    // GCC/clang allow native access to the float members through a simple array
+    // access operator (in C since 4.6, in C++ since 4.8).
+    //
+    // Ideally direct accesses to SIMD vectors should not be used since it can
+    // cause a performance hit.  If it really is needed however, the original
+    // __m128 variable can be aliased with a pointer to this union and used to
+    // access individual components.  The use of this union should be hidden
+    // behind a macro that is used throughout the codebase to access the members
+    // instead of always declaring this type of variable.
+    typedef union ALIGN_STRUCT(16) SIMDVec {
   float m128_f32[4];  // as floats - do not to use this.  Added for convenience.
   int8_t m128_i8[16];    // as signed 8-bit integers.
   int16_t m128_i16[8];   // as signed 16-bit integers.
@@ -1882,7 +1882,7 @@ FORCE_INLINE void _mm_sfence(void) { __sync_synchronize(); }
 // https://msdn.microsoft.com/en-us/library/ba08y07y%28v=vs.90%29.aspx
 FORCE_INLINE void _mm_stream_si128(__m128i *p, __m128i a) { *p = a; }
 
-//TODO: same to _mm_sqrt_ss now
+// TODO: same to _mm_sqrt_ss now
 FORCE_INLINE __m128 _mm_rsqrt_ss(__m128 in) {
   float32_t value = vgetq_lane_f32(vreinterpretq_f32_m128(_mm_sqrt_ps(in)), 0);
   return vreinterpretq_m128_f32(
@@ -1895,24 +1895,60 @@ FORCE_INLINE __m128i _mm_cmpeq_epi32(__m128i a, __m128i b) {
 }
 
 FORCE_INLINE __m128 _mm_movelh_ps(__m128 a, __m128 b) {
-  return vreinterpretq_m128i_s32(
+  return vreinterpretq_m128_f32(
       vcombine_f32(vget_low_f32(vreinterpretq_f32_m128(a)),
                    vget_low_f32(vreinterpretq_f32_m128(b))));
 }
 
 FORCE_INLINE __m128 _mm_movehl_ps(__m128 a, __m128 b) {
-  return vreinterpretq_m128i_s32(
+  return vreinterpretq_m128_f32(
       vcombine_f32(vget_high_f32(vreinterpretq_f32_m128(a)),
                    vget_high_f32(vreinterpretq_f32_m128(b))));
 }
 
 FORCE_INLINE __m128 _mm_move_ss(__m128 a, __m128 b) {
   float32x2_t b01 = vget_low_f32(vreinterpretq_f32_m128(b));
-  return vreinterpretq_m128i_s32(
-      vcombine_f32(vset_lane_f32(vgetq_lane_f32(vreinterpretq_f32_m128(a), 0), b01, 0),
-                   vget_high_f32(vreinterpretq_f32_m128(b))));
+  return vreinterpretq_m128_f32(vcombine_f32(
+      vset_lane_f32(vgetq_lane_f32(vreinterpretq_f32_m128(a), 1), b01, 1),
+      vget_high_f32(vreinterpretq_f32_m128(a))));
 }
 
+FORCE_INLINE __m128 _mm_set_ss(float a) {
+  return vreinterpretq_m128_f32(vset_lane_f32(a, _mm_setzero_ps(), 0));
+}
+
+FORCE_INLINE __m128 _mm_load_ps1(float const *mem_addr) {
+  return vreinterpretq_m128_f32(vld1q_f32(mem_addr));
+}
+
+FORCE_INLINE __m128 _mm_rcp_ss(__m128 a) {
+  float32x4_t rcpa = _mm_rcp_ps(vreinterpretq_f32_m128(a));
+  return _mm_move_ss(a, rcpa);
+}
+
+FORCE_INLINE __m128 _mm_cmplt_ss(__m128 a, __m128 b) {
+  uint32x4_t cmpab = vreinterpretq_m128_u32(vclt_f32(vreinterpretq_f32_m128(a),
+                                 vreinterpretq_f32_m128(b)));
+  return _mm_move_ss(a, vreinterpretq_f32_m128(cmpab));
+}
+
+FORCE_INLINE __m128 _mm_cmpgt_ss(__m128 a, __m128 b) {
+  uint32x4_t cmpab = vreinterpretq_m128_u32(
+      vcgt_f32(vreinterpretq_f32_m128(a), vreinterpretq_f32_m128(b)));
+  return _mm_move_ss(a, vreinterpretq_f32_m128(cmpab));
+}
+
+FORCE_INLINE __m128 _mm_mul_ss(__m128 a, __m128 b) {
+  float32x4_t mulval =
+      _mm_mul_ps(vreinterpretq_f32_m128(a), vreinterpretq_f32_m128(b));
+  return _mm_move_ss(a, mulval);
+}
+
+FORCE_INLINE __m128 _mm_sub_ss(__m128 a, __m128 b) {
+  float32x4_t subval =
+      _mm_sub_ps(vreinterpretq_f32_m128(a), vreinterpretq_f32_m128(b));
+  return _mm_move_ss(a, subval);
+}
 
 // Cache line containing p is flushed and invalidated from all caches in the
 // coherency domain. :
