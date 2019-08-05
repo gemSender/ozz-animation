@@ -163,7 +163,7 @@ IN
 
 typedef float32x4_t __m128;
 typedef int32x4_t __m128i;
-typedef float32x2_t __m64
+typedef float32x2_t __m64;
 // ******************************************
 // type-safe casting between types
 // ******************************************
@@ -1929,13 +1929,13 @@ FORCE_INLINE __m128 _mm_rcp_ss(__m128 a) {
 FORCE_INLINE __m128 _mm_cmplt_ss(__m128 a, __m128 b) {
   uint32x4_t cmpab = vreinterpretq_m128_u32(vclt_f32(vreinterpretq_f32_m128(a),
                                  vreinterpretq_f32_m128(b)));
-  return _mm_move_ss(a, vreinterpretq_u32_m128(cmpab));
+  return _mm_move_ss(a, vreinterpretq_m128_u32(cmpab));
 }
 
 FORCE_INLINE __m128 _mm_cmpgt_ss(__m128 a, __m128 b) {
   uint32x4_t cmpab = vreinterpretq_m128_u32(
       vcgt_f32(vreinterpretq_f32_m128(a), vreinterpretq_f32_m128(b)));
-  return _mm_move_ss(a, vreinterpretq_u32_m128(cmpab));
+  return _mm_move_ss(a, vreinterpretq_m128_u32(cmpab));
 }
 
 FORCE_INLINE __m128 _mm_mul_ss(__m128 a, __m128 b) {
