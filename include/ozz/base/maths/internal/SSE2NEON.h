@@ -1890,7 +1890,7 @@ FORCE_INLINE __m128 _mm_rsqrt_ss(__m128 in) {
 }
 
 FORCE_INLINE __m128i _mm_cmpeq_epi32(__m128i a, __m128i b) {
-  return vreinterpretq_m128i_s32(
+  return vreinterpretq_m128i_u32(
       vceqq_s32(vreinterpretq_s32_m128i(a), vreinterpretq_s32_m128i(b)));
 }
 
