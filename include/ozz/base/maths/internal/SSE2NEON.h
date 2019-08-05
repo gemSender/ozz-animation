@@ -1927,13 +1927,12 @@ FORCE_INLINE __m128 _mm_rcp_ss(__m128 a) {
 }
 
 FORCE_INLINE __m128 _mm_cmplt_ss(__m128 a, __m128 b) {
-  uint32x4_t cmpab = vclt_f32(vreinterpretq_f32_m128(a), vreinterpretq_f32_m128(b));
+  uint32x4_t cmpab = vcltq_f32(vreinterpretq_f32_m128(a), vreinterpretq_f32_m128(b));
   return _mm_move_ss(a, vreinterpretq_m128_u32(cmpab));
 }
 
 FORCE_INLINE __m128 _mm_cmpgt_ss(__m128 a, __m128 b) {
-  uint32x4_t cmpab = vreinterpretq_m128_u32(
-      vcgt_f32(vreinterpretq_f32_m128(a), vreinterpretq_f32_m128(b)));
+  uint32x4_t cmpab = vcgtq_f32(vreinterpretq_f32_m128(a), vreinterpretq_f32_m128(b));
   return _mm_move_ss(a, vreinterpretq_m128_u32(cmpab));
 }
 
