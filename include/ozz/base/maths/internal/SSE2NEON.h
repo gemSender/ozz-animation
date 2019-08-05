@@ -1927,8 +1927,7 @@ FORCE_INLINE __m128 _mm_rcp_ss(__m128 a) {
 }
 
 FORCE_INLINE __m128 _mm_cmplt_ss(__m128 a, __m128 b) {
-  uint32x4_t cmpab = vreinterpretq_m128_u32(vclt_f32(vreinterpretq_f32_m128(a),
-                                 vreinterpretq_f32_m128(b)));
+  uint32x4_t cmpab = vclt_f32(vreinterpretq_f32_m128(a), vreinterpretq_f32_m128(b));
   return _mm_move_ss(a, vreinterpretq_m128_u32(cmpab));
 }
 
@@ -1951,7 +1950,7 @@ FORCE_INLINE __m128 _mm_sub_ss(__m128 a, __m128 b) {
 }
 
 FORCE_INLINE void _mm_storel_pi(__m64 *mem_addr, __m128 a) {
-  vst1_f32((float32_t *)p, vget_low_f32((float32x4_t)a));
+  vst1_f32((float32_t *)mem_addr, vget_low_f32((float32x4_t)a));
 }
 
 FORCE_INLINE __m128i _mm_loadl_epi64(__m128i const *p) {
