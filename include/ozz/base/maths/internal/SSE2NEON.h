@@ -1910,7 +1910,7 @@ FORCE_INLINE __m128 _mm_move_ss(__m128 a, __m128 b) {
   float32x2_t b01 = vget_low_f32(vreinterpretq_f32_m128(b));
   return vreinterpretq_m128i_s32(
       vcombine_f32(vset_lane_f32(vgetq_lane_f32(vreinterpretq_f32_m128(a), 0), b01, 0),
-                   vget_high_f32(vreinterpretq_f32_m128(b)));
+                   vget_high_f32(vreinterpretq_f32_m128(b))));
 }
 
 
