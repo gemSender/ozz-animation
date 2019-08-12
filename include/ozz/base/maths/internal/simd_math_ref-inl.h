@@ -189,6 +189,14 @@ OZZ_INLINE SimdFloat4 FromInt(_SimdInt4 _i) {
                           static_cast<float>(_i.z), static_cast<float>(_i.w)};
   return ret;
 }
+
+OZZ_INLINE SimdFloat4 CastInt(_SimdInt4 _i) { 
+  const SimdFloat4 ret = {
+      *static_cast<float*>(&_i.x), *static_cast<float*>(&_i.y),
+      *static_cast<float*>(&_i.z), static_cast<float>(&_i.w)};
+  return ret;
+}
+
 }  // namespace simd_float4
 
 OZZ_INLINE float GetX(_SimdFloat4 _v) { return _v.x; }
@@ -1864,6 +1872,20 @@ OZZ_INLINE ozz::math::SimdFloat4 TransformVector(const ozz::math::Float4x4& _m,
 }
 }  // namespace math
 }  // namespace ozz
+
+OZZ_INLINE ozz::math::SimdInt4 operator+(ozz::math::SimdInt4 _a,
+                                         ozz::math::SimdInt4 _b) {
+  const ozz::math::SimdInt4 ret = {_a.x + _b.x, _a.y + _b.y, _a.z + _b.z,
+                                     _a.w + _b.w};
+  return ret;
+}
+
+OZZ_INLINE ozz::math::SimdInt4 operator-(ozz::math::SimdInt4 _a,
+                                         ozz::math::SimdInt4 _b) {
+  const ozz::math::SimdInt4 ret = {_a.x - _b.x, _a.y - _b.y, _a.z - _b.z,
+                                     _a.w - _b.w};
+  return ret;
+}
 
 OZZ_INLINE ozz::math::SimdFloat4 operator+(ozz::math::_SimdFloat4 _a,
                                            ozz::math::_SimdFloat4 _b) {

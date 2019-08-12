@@ -179,7 +179,12 @@ OZZ_INLINE SimdFloat4 Load3PtrU(const float* _f) {
 }
 
 OZZ_INLINE SimdFloat4 FromInt(_SimdInt4 _i) { return _mm_cvtepi32_ps(_i); }
-}  // ozz::math::simd_float4
+
+OZZ_INLINE SimdFloat4 CastInt(_SimdInt4 _i) { return _mm_castsi128_ps(_i); }
+
+}  // namespace simd_float4
+
+
 
 OZZ_INLINE float GetX(_SimdFloat4 _v) { return _mm_cvtss_f32(_v); }
 
@@ -1817,6 +1822,16 @@ OZZ_INLINE ozz::math::SimdFloat4 TransformVector(const ozz::math::Float4x4& _m,
 }  // namespace ozz
 
 #if !defined(__GNUC__)
+OZZ_INLINE ozz::math::SimdInt4 operator+(ozz::math::SimdInt4 _a,
+                                         ozz::math::SimdInt4 _b) {
+  return _mm_add_epi32(_a, _b);
+}
+
+OZZ_INLINE ozz::math::SimdInt4 operator-(ozz::math::SimdInt4 _a,
+                                         ozz::math::SimdInt4 _b) {
+  return _mm_sub_epi32(_a, _b);
+}
+
 OZZ_INLINE ozz::math::SimdFloat4 operator+(ozz::math::_SimdFloat4 _a,
                                            ozz::math::_SimdFloat4 _b) {
   return _mm_add_ps(_a, _b);
